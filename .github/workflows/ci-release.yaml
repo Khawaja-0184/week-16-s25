@@ -1,0 +1,24 @@
+name: wf/ci-release
+on:
+  pull_request:
+    branches: 
+      - release/**
+    types:  
+      - opened 
+      - synchronize 
+jobs: 
+  linting-job-release:
+    runs-on: ubuntu-laest
+    steps:
+     - name: Checkout reprosetory from github server
+       uses: actions/checkout@v4
+       with:
+        ref: "${{github.ref}}"
+     - name: Currently checkout branch
+       run: echo "${{github.ref}}"
+     - name: Lint the html files with htmlhint 
+       run: npx htmlhint "**/*.html"
+     - name: Lint css fils wiht csslint 
+       run: npx stylelint "**/*.css"
+     - name: build website with parcel
+       run: npx parcel build "./src/index.html"  --dist-dir "./dist" -- public-url "./"
