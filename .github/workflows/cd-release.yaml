@@ -1,0 +1,35 @@
+name: wf-cd-develop
+on:
+  push:
+    branches:
+      - release/**
+jobs:
+  build-release-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout the resportory
+        uses: action/checkout@v4
+        with:
+          ref: "${{github.ref}}"
+      - name: Build Website with parcel
+        run: npx parcel build "./src/index.html" --dist-dir "./rel-dist" --public-url "./"
+      - name: Upload build artifacts 
+        uses: action/upload-pages-artifact@v3
+        with:
+          path: "./rel-dist"
+          name: "release-build-artifact"
+  deploy-release-job: 
+    needs: "build-release-job"
+    runs-on: ubuntu-latest
+    environment:
+       name: "develop-env"
+    permissions: 
+      id-token: write
+      pages: write
+    steps: 
+      - name: deployed build artfacts in "develop-env"
+        uses: actions/deploy-pages@v4
+        with: 
+          artifacts_name: "release-build-artifact"
+          token: "${{github.token}}"
+          
